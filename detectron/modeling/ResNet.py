@@ -25,7 +25,11 @@ from __future__ import unicode_literals
 
 from detectron.core.config import cfg
 from detectron.utils.net import get_group_gn
+<<<<<<< HEAD
 import pdb
+=======
+
+>>>>>>> 058768239b2d859c7350f633609fddb3a9094a91
 
 # ---------------------------------------------------------------------------- #
 # Bits for specific architectures (ResNet50, ResNet101, ...)

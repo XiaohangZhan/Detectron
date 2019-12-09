@@ -523,7 +523,6 @@ def sobel(im):
     sobel2 = signal.convolve2d(gray, kernel2, boundary='fill', fillvalue=0., mode='same')[:,:,np.newaxis]
     return np.concatenate((sobel1, sobel2), axis=2) # HW2
 
-
 def _prepare_blobs(im, pixel_means, target_size, max_size):
     """ Reference: blob.prep_im_for_blob() """
 
