@@ -514,12 +514,28 @@ def run_model_cfg(args, im, check_blobs):
 
     return ret
 
+def sobel(im):
+    from scipy import signal
+    gray = np.mean(im, axis=2)
+    kernel1 = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]])
+    kernel2 = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]])
+    sobel1 = signal.convolve2d(gray, kernel1, boundary='fill', fillvalue=0., mode='same')[:,:,np.newaxis]
+    sobel2 = signal.convolve2d(gray, kernel2, boundary='fill', fillvalue=0., mode='same')[:,:,np.newaxis]
+    return np.concatenate((sobel1, sobel2), axis=2) # HW2
+
 
 def _prepare_blobs(im, pixel_means, target_size, max_size):
     """ Reference: blob.prep_im_for_blob() """
 
     im = im.astype(np.float32, copy=False)
     im -= pixel_means
+
+    if cfg.SOBEL:
+        ###### add by Xiaohang ########
+        im /= np.array([[[57.375, 57.12, 58.395]]])
+        im = sobel(im)
+        ###############################
+
     im_shape = im.shape
 
     im_size_min = np.min(im_shape[0:2])

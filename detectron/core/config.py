@@ -949,6 +949,7 @@ __C.BBOX_XFORM_CLIP = np.log(1000. / 16.)
 # We use the same pixel mean for all networks even though it's not exactly what
 # they were trained with
 # "Fun" fact: the history of where these values comes from is lost
+__C.SOBEL = False
 __C.PIXEL_MEANS = np.array([[[102.9801, 115.9465, 122.7717]]])
 #__C.PIXEL_STDS = np.array([[[57.375, 57.12, 58.395]]])
 

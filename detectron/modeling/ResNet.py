@@ -25,7 +25,7 @@ from __future__ import unicode_literals
 
 from detectron.core.config import cfg
 from detectron.utils.net import get_group_gn
-
+import pdb
 
 # ---------------------------------------------------------------------------- #
 # Bits for specific architectures (ResNet50, ResNet101, ...)
@@ -249,7 +249,14 @@ def basic_bn_stem(model, data, **kwargs):
     """
 
     dim = 64
-    p = model.Conv(data, 'conv1', 3, dim, 7, pad=3, stride=2, no_bias=1)
+
+    ########### Xiaohang ###############
+    if cfg.SOBEL:
+        p = model.Conv(data, 'conv1', 2, dim, 7, pad=3, stride=2, no_bias=1)
+    else:
+        p = model.Conv(data, 'conv1', 3, dim, 7, pad=3, stride=2, no_bias=1)
+    ####################################
+
     p = model.AffineChannel(p, 'res_conv1_bn', dim=dim, inplace=True)
     p = model.Relu(p, p)
     p = model.MaxPool(p, 'pool1', kernel=3, pad=1, stride=2)

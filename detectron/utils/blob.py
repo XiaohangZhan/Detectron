@@ -36,6 +36,9 @@ from caffe2.proto import caffe2_pb2
 
 from detectron.core.config import cfg
 
+import torch
+from .sobel import Sobel
+sobel_module = Sobel()
 
 def get_image_blob(im, target_scale, target_max_size):
     """Convert an image into a network input.
@@ -84,9 +87,17 @@ def im_list_to_blob(ims):
         max_shape[1] = int(np.ceil(max_shape[1] / stride) * stride)
 
     num_images = len(ims)
+
+    ######### Xiaohang #############
+    if cfg.SOBEL:
+        input_dim = 2
+    else:
+        input_dim = 3
+    ###############################
     blob = np.zeros(
-        (num_images, max_shape[0], max_shape[1], 3), dtype=np.float32
+        (num_images, max_shape[0], max_shape[1], input_dim), dtype=np.float32
     )
+
     for i in range(num_images):
         im = ims[i]
         blob[i, 0:im.shape[0], 0:im.shape[1], :] = im
@@ -96,6 +107,20 @@ def im_list_to_blob(ims):
     blob = blob.transpose(channel_swap)
     return blob
 
+def sobel_torch(im):
+    x = torch.from_numpy(im.transpose((2,0,1))).unsqueeze(0)
+    x = sobel_module(x)
+    x = x.numpy().squeeze().transpose((1,2,0))
+    return x
+
+def sobel(im):
+    from scipy import signal
+    gray = np.mean(im, axis=2)
+    kernel1 = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]])
+    kernel2 = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]])
+    sobel1 = signal.convolve2d(gray, kernel1, boundary='fill', fillvalue=0., mode='same')[:,:,np.newaxis]
+    sobel2 = signal.convolve2d(gray, kernel2, boundary='fill', fillvalue=0., mode='same')[:,:,np.newaxis]
+    return np.concatenate((sobel1, sobel2), axis=2) # HW2
 
 def prep_im_for_blob(im, pixel_means, target_size, max_size):
     """Prepare an image for use as a network input blob. Specially:
@@ -107,6 +132,13 @@ def prep_im_for_blob(im, pixel_means, target_size, max_size):
     """
     im = im.astype(np.float32, copy=False)
     im -= pixel_means
+
+    if cfg.SOBEL:
+        ###### add by Xiaohang ########
+        im /= np.array([[[57.375, 57.12, 58.395]]])
+        im = sobel_torch(im)
+        ###############################
+
     im_shape = im.shape
     im_size_min = np.min(im_shape[0:2])
     im_size_max = np.max(im_shape[0:2])
